@@ -63,7 +63,7 @@ object lockfreectr {
 //The next function returns the next element to be returned.
         def next(): Option[Int] = {
             while(true) {
-                var (pos) = minPos(iter0.cur(),iter1.cur())
+                var pos = minPos(iter0.cur(),iter1.cur())
 //After finding which iterator to trigger, we use the first CAS to check that no other thread has already triggered the iterator corresponding to this value. This is done by comparing the corresponding pair (pair0 for iter0, pair1 for iter1) for the past value stored, and then updating that to the current value, along with the thread number. This signifies that the job of updating the current value (by invoking next) is of that thread. The second CAS initializes the pair to the current value, and initializes the thread number to -1. This makes sure that the iterator is ready for incrementing on the next round, as on the next round, some thread will find the past value of next round (which is equal to the current value of this round), and take the responsibility of updating the current value of the next round (or the next value of the current round). Only one thread with the correct thread ID passes through the second CAS, after which it returns iter.next. The linearization point is the return statement, iter0.next or iter1.next, depending on which iterator is called. [While minPos returns the correct iterator to trigger, if both of them are out of bounds, it will return 1, but the underlying iterator will itself return None, so this will work for that as well.]
                 if (pos==0)  {
                     var result = iter0.from.get 
